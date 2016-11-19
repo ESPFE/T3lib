@@ -17,3 +17,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+namespace ESP\T3lib\ViewHelpers;
+
+
+class RandViewHelper extends \TYPO3\CMS\Fluid\Core\ViewHelper\AbstractViewHelper
+{
+    /**
+     * function render
+     * 
+     * @return string
+     */
+    public function render()
+    {
+        return rand();
+    }
+}
