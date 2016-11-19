@@ -29,6 +29,7 @@ class RandViewHelper extends \TYPO3\CMS\Fluid\Core\ViewHelper\AbstractViewHelper
      */
     public function render()
     {
+		srand();
         return rand();
     }
 }
