@@ -17,7 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace \ESP\T3lib\ViewHelpers;
+namespace ESP\T3lib\ViewHelpers;
 
 use TYPO3\CMS\Core\Resource\Exception\ResourceDoesNotExistException;
 use TYPO3\CMS\Core\Resource\FileInterface;
@@ -43,13 +43,7 @@ class PictureViewHelper extends \TYPO3\CMS\Fluid\Core\ViewHelper\AbstractViewHel
 	 * @var string
 	 */
 	protected $fallbackTagName = 'img';
-	
-	/**
-	 *
-	 * @var integer
-	 */
-	protected $widthXSMin = 0;
-	
+
 	/**
 	 *
 	 * @var integer
@@ -60,31 +54,15 @@ class PictureViewHelper extends \TYPO3\CMS\Fluid\Core\ViewHelper\AbstractViewHel
 	 *
 	 * @var integer
 	 */
-	protected $widthSMMin = 769;
-	
-	/**
-	 *
-	 * @var integer
-	 */
 	protected $widthSMMax = 991;
-	
-	/**
-	 *
-	 * @var integer
-	 */
-	protected $widthMDMin = 992;
-	
+
 	/**
 	 *
 	 * @var integer
 	 */
 	protected $widthMDMax = 1199;
 	
-	/**
-	 *
-	 * @var integer
-	 */
-	protected $widthLGMin = 1200;
+	protected $maxImgWidth = 2000;
 	
 	/**
 	 *
@@ -108,11 +86,22 @@ class PictureViewHelper extends \TYPO3\CMS\Fluid\Core\ViewHelper\AbstractViewHel
 	protected function renderAgruments()
 	{
 		$content = '';
-		foreach($this->arguments as $arg => $val)
-		{
-			$content .= ' ' . $arg . '="' . $val . '"';
-		}
-		return $content;
+		
+		$content .= (isset($this->arguments['class']))		? ' class="'		.	$this->arguments['class'] . '"'		: '';
+		$content .= (isset($this->arguments['dir']))		? ' dir="'			.	$this->arguments['dir'] . '"'		: '';
+		$content .= (isset($this->arguments['id']))			? ' id="'			.	$this->arguments['id'] . '"'		: '';
+		$content .= (isset($this->arguments['lang']))		? ' lang="'			.	$this->arguments['lang'] . '"'		: '';
+		$content .= (isset($this->arguments['style']))		? ' style="'		.	$this->arguments['style'] . '"'		: '';
+		$content .= (isset($this->arguments['title']))		? ' title="'		.	$this->arguments['title'] . '"'		: '';
+		$content .= (isset($this->arguments['accesskey']))	? ' accesskey="'	.	$this->arguments['accesskey'] . '"'	: '';
+		$content .= (isset($this->arguments['tabindex']))	? ' tabindex="'		.	$this->arguments['tabindex'] . '"'	: '';
+		$content .= (isset($this->arguments['onclick']))	? ' onclick="'		.	$this->arguments['onclick'] . '"'	: '';
+		$content .= (isset($this->arguments['alt']))		? ' alt="'			.	$this->arguments['alt'] . '"'		: ' alt=""';
+		$content .= (isset($this->arguments['ismap']))		? ' ismap="'		.	$this->arguments['ismap'] . '"'		: '';
+		$content .= (isset($this->arguments['longdesc']))	? ' longdesc="'		.	$this->arguments['longdesc'] . '"'	: '';
+		$content .= (isset($this->arguments['usemap']))		? ' usemap="'		.	$this->arguments['usemap'] . '"'	: '';
+		
+		return ltrim($content);
 	}
 	
 	/**
@@ -133,10 +122,15 @@ class PictureViewHelper extends \TYPO3\CMS\Fluid\Core\ViewHelper\AbstractViewHel
 	
 	protected function processImage($image, $width)
 	{
-		$processingInstructions = [
-			'max-width' => $width
-		];
-		return $this->imageService->applyProcessingInstructions($iamge, $processingInstructions);
+		if($image->getProperty('width') > $width)
+		{
+			$processingInstructions = [
+				'width' => $width
+			];
+			$image = $this->imageService->applyProcessingInstructions($image, $processingInstructions);
+		}
+		
+		return $image;
 	}
 
 	/**
@@ -203,13 +197,12 @@ class PictureViewHelper extends \TYPO3\CMS\Fluid\Core\ViewHelper\AbstractViewHel
 		$imageUriMD = $this->imageService->getImageUri($imageMD, $absolute);
 		$imageUri = $this->imageService->getImageUri( $image, $absolute);
 		
-		$arguments = $this->renderAgruments();
-		$output = '<' . $this->tagName . $arguments . '>';
-		$output .= '<' . $this->innerTagName . 'srcset="' . $imageUriXS . '" media="(min-width: "' . $this->widthXSMin . 'px) and (max-width: ' . $this->widthXSMax . 'px)" />';
-		$output .= '<' . $this->innerTagName . 'srcset="' . $imageUriSM . '" media="(min-width: "' . $this->widthSMMin . 'px) and (max-width: ' . $this->widthSMMax . 'px)" />';
-		$output .= '<' . $this->innerTagName . 'srcset="' . $imageUriMD . '" media="(min-width: "' . $this->widthMDMin . 'px) and (max-width: ' . $this->widthMDMax . 'px)" />';
-		$output .= '<' . $this->innerTagName . 'srcset="' . $imageUri . '" media="(min-width: "' . $this->widthLGMin . 'px)" />';
-		$output .= '<' . $this->fallbackTagName . 'src="' . $imageUri . '" alt="" />';
+		$output = '<' . $this->tagName . '>';
+		$output .= '<' . $this->innerTagName . ' srcset="' . $imageUriXS . '" media="(max-width: ' . $this->widthXSMax . 'px)" />';
+		$output .= '<' . $this->innerTagName . ' srcset="' . $imageUriSM . '" media="(max-width: ' . $this->widthSMMax . 'px)" />';
+		$output .= '<' . $this->innerTagName . ' srcset="' . $imageUriMD . '" media="(max-width: ' . $this->widthMDMax . 'px)" />';
+		$output .= '<' . $this->innerTagName . ' srcset="' . $imageUri . '" />';
+		$output .= '<' . $this->fallbackTagName . ' src="' . $imageUri . '" ' . $this->renderAgruments() . ' />';
 		$output .= '</' . $this->tagName . '>';
 		
 		return $output;
