@@ -62,7 +62,11 @@ class PictureViewHelper extends \TYPO3\CMS\Fluid\Core\ViewHelper\AbstractViewHel
 	 */
 	protected $widthMDMax = 1199;
 	
-	protected $maxImgWidth = 2000;
+	/**
+	 *
+	 * @var integer
+	 */
+	protected $maxImgWidth = 2500;
 	
 	/**
 	 *
@@ -110,13 +114,16 @@ class PictureViewHelper extends \TYPO3\CMS\Fluid\Core\ViewHelper\AbstractViewHel
 	 * @param integer $widthXS
 	 * @param integer $widthSM
 	 * @param integer $widthMD
+	 * @param integer $widthLG
+	 * 
 	 * @return array
 	 */
-	protected function calcImageWidth($widthXS, $widthSM, $widthMD)
+	protected function calcImageWidth($widthXS, $widthSM, $widthMD, $widthLG)
 	{
-		$this->widthArr['xs'] = ($this->widthXSMax / $widthXS) * 100;
-		$this->widthArr['sm'] = ($this->widthSMMax / $widthSM) * 100;
-		$this->widthArr['md'] = ($this->widthMDMax / $widthMD) * 100;
+		$this->widthArr['xs'] = ($widthXS / 100) * $this->widthXSMax;
+		$this->widthArr['sm'] = ($widthSM / 100) * $this->widthSMMax;
+		$this->widthArr['md'] = ($widthMD / 100) * $this->widthMDMax;
+		$this->widthArr['lg'] = ($widthLG / 100) * $this->maxImgWidth;
 		return $this->widthArr;
 	}
 	
@@ -166,6 +173,7 @@ class PictureViewHelper extends \TYPO3\CMS\Fluid\Core\ViewHelper\AbstractViewHel
 	 * @param integer $widthXS
 	 * @param integer $widthSM
 	 * @param integer $widthMD
+	 * @param integer $widthLG
 	 * 
 	 * @return string
 	 */
@@ -176,7 +184,8 @@ class PictureViewHelper extends \TYPO3\CMS\Fluid\Core\ViewHelper\AbstractViewHel
 			$absolute = false,
 			$widthXS = 100,
 			$widthSM = 100,
-			$widthMD = 100
+			$widthMD = 100,
+			$widthLG = 100
 	)
 	{
 		if (is_null($src) && is_null($image) || !is_null($src) && !is_null($image))
@@ -186,11 +195,12 @@ class PictureViewHelper extends \TYPO3\CMS\Fluid\Core\ViewHelper\AbstractViewHel
 		
 		// get image from typo3 image service
 		$image = $this->imageService->getImage($src, $image, $treatIdAsReference);
-		$widthArr = $this->calcImageWidth($widthXS, $widthSM, $widthMD);
+		$widthArr = $this->calcImageWidth($widthXS, $widthSM, $widthMD, $widthLG);
 		
 		$imageXS = $this->processImage($image, $widthArr['xs']);
 		$imageSM = $this->processImage($image, $widthArr['sm']);
 		$imageMD = $this->processImage($image, $widthArr['md']);
+		$image = $this->processImage($image, $widthArr['lg']);
 		
 		$imageUriXS = $this->imageService->getImageUri($imageXS, $absolute);
 		$imageUriSM = $this->imageService->getImageUri($imageSM, $absolute);
