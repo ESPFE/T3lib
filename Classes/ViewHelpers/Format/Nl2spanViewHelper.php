@@ -83,7 +83,7 @@ class Nl2spanViewHelper extends AbstractViewHelper implements CompilableInterfac
 		$valueArr = explode('<br />', $value);
 		for($i = 0; $i < count($valueArr); $i++)
 		{
-			$valueArr[$i] = '<span class="' . $i . '">' . $valueArr[$i] . '</span>';
+			$valueArr[$i] = '<span class="span-' . $i . '">' . $valueArr[$i] . '</span>';
 		}
 		return implode('', $valueArr);
     }
