@@ -81,6 +81,13 @@ class PictureViewHelper extends \TYPO3\CMS\Fluid\Core\ViewHelper\AbstractViewHel
 	 * @inject
 	 */
 	protected $imageService;
+        
+        /**
+         * Disable Output escapeing
+         * 
+         * @var bool
+         */
+        protected $escapeOutput = false;
 	
 	/**
 	 * renderArguments
@@ -146,22 +153,22 @@ class PictureViewHelper extends \TYPO3\CMS\Fluid\Core\ViewHelper\AbstractViewHel
 	 * @return void
 	 */
 	public function initializeArguments()
-    {
-        parent::initializeArguments();
-        $this->registerArgument('class', 'string', 'CSS class(es) for this element');
-        $this->registerArgument('dir', 'string', 'Text direction for this HTML element. Allowed strings: "ltr" (left to right), "rtl" (right to left)');
-        $this->registerArgument('id', 'string', 'Unique (in this file) identifier for this HTML element.');
-        $this->registerArgument('lang', 'string', 'Language for this element. Use short names specified in RFC 1766');
-        $this->registerArgument('style', 'string', 'Individual CSS styles for this element');
-        $this->registerArgument('title', 'string', 'Tooltip text of element');
-        $this->registerArgument('accesskey', 'string', 'Keyboard shortcut to access this element');
-        $this->registerArgument('tabindex', 'integer', 'Specifies the tab order of this element');
-        $this->registerArgument('onclick', 'string', 'JavaScript evaluated for the onclick event');
-        $this->registerArgument('alt', 'string', 'Specifies an alternate text for an image', false);
-        $this->registerArgument('ismap', 'string', 'Specifies an image as a server-side image-map. Rarely used. Look at usemap instead', false);
-        $this->registerArgument('longdesc', 'string', 'Specifies the URL to a document that contains a long description of an image', false);
-        $this->registerArgument('usemap', 'string', 'Specifies an image as a client-side image-map', false);
-    }
+        {
+            parent::initializeArguments();
+            $this->registerArgument('class', 'string', 'CSS class(es) for this element');
+            $this->registerArgument('dir', 'string', 'Text direction for this HTML element. Allowed strings: "ltr" (left to right), "rtl" (right to left)');
+            $this->registerArgument('id', 'string', 'Unique (in this file) identifier for this HTML element.');
+            $this->registerArgument('lang', 'string', 'Language for this element. Use short names specified in RFC 1766');
+            $this->registerArgument('style', 'string', 'Individual CSS styles for this element');
+            $this->registerArgument('title', 'string', 'Tooltip text of element');
+            $this->registerArgument('accesskey', 'string', 'Keyboard shortcut to access this element');
+            $this->registerArgument('tabindex', 'integer', 'Specifies the tab order of this element');
+            $this->registerArgument('onclick', 'string', 'JavaScript evaluated for the onclick event');
+            $this->registerArgument('alt', 'string', 'Specifies an alternate text for an image', false);
+            $this->registerArgument('ismap', 'string', 'Specifies an image as a server-side image-map. Rarely used. Look at usemap instead', false);
+            $this->registerArgument('longdesc', 'string', 'Specifies the URL to a document that contains a long description of an image', false);
+            $this->registerArgument('usemap', 'string', 'Specifies an image as a client-side image-map', false);
+        }
 	
 	/**
 	 * render
@@ -178,43 +185,43 @@ class PictureViewHelper extends \TYPO3\CMS\Fluid\Core\ViewHelper\AbstractViewHel
 	 * @return string
 	 */
 	public function render(
-			$src = null,
-			$treatIdAsReference = false,
-			$image = null,
-			$absolute = false,
-			$widthXS = 100,
-			$widthSM = 100,
-			$widthMD = 100,
-			$widthLG = 100
+            $src = null,
+            $treatIdAsReference = false,
+            $image = null,
+            $absolute = false,
+            $widthXS = 100,
+            $widthSM = 100,
+            $widthMD = 100,
+            $widthLG = 100
 	)
 	{
-		if (is_null($src) && is_null($image) || !is_null($src) && !is_null($image))
-		{
-            throw new \TYPO3\CMS\Fluid\Core\ViewHelper\Exception('You must either specify a string src or a File object.', 1479641029);
-        }
+            if (is_null($src) && is_null($image) || !is_null($src) && !is_null($image))
+            {
+                throw new \TYPO3\CMS\Fluid\Core\ViewHelper\Exception('You must either specify a string src or a File object.', 1479641029);
+            }
 		
-		// get image from typo3 image service
-		$image = $this->imageService->getImage($src, $image, $treatIdAsReference);
-		$widthArr = $this->calcImageWidth($widthXS, $widthSM, $widthMD, $widthLG);
-		
-		$imageXS = $this->processImage($image, $widthArr['xs']);
-		$imageSM = $this->processImage($image, $widthArr['sm']);
-		$imageMD = $this->processImage($image, $widthArr['md']);
-		$image = $this->processImage($image, $widthArr['lg']);
-		
-		$imageUriXS = $this->imageService->getImageUri($imageXS, $absolute);
-		$imageUriSM = $this->imageService->getImageUri($imageSM, $absolute);
-		$imageUriMD = $this->imageService->getImageUri($imageMD, $absolute);
-		$imageUri = $this->imageService->getImageUri( $image, $absolute);
-		
-		$output = '<' . $this->tagName . '>';
-		$output .= '<' . $this->innerTagName . ' srcset="' . $imageUriXS . '" media="(max-width: ' . $this->widthXSMax . 'px)" />';
-		$output .= '<' . $this->innerTagName . ' srcset="' . $imageUriSM . '" media="(max-width: ' . $this->widthSMMax . 'px)" />';
-		$output .= '<' . $this->innerTagName . ' srcset="' . $imageUriMD . '" media="(max-width: ' . $this->widthMDMax . 'px)" />';
-		$output .= '<' . $this->innerTagName . ' srcset="' . $imageUri . '" />';
-		$output .= '<' . $this->fallbackTagName . ' src="' . $imageUri . '" ' . $this->renderAgruments() . ' />';
-		$output .= '</' . $this->tagName . '>';
-		
-		return $output;
+            // get image from typo3 image service
+            $image = $this->imageService->getImage($src, $image, $treatIdAsReference);
+            $widthArr = $this->calcImageWidth($widthXS, $widthSM, $widthMD, $widthLG);
+
+            $imageXS = $this->processImage($image, $widthArr['xs']);
+            $imageSM = $this->processImage($image, $widthArr['sm']);
+            $imageMD = $this->processImage($image, $widthArr['md']);
+            $image = $this->processImage($image, $widthArr['lg']);
+
+            $imageUriXS = $this->imageService->getImageUri($imageXS, $absolute);
+            $imageUriSM = $this->imageService->getImageUri($imageSM, $absolute);
+            $imageUriMD = $this->imageService->getImageUri($imageMD, $absolute);
+            $imageUri = $this->imageService->getImageUri( $image, $absolute);
+
+            $output = '<' . $this->tagName . '>';
+            $output .= '<' . $this->innerTagName . ' srcset="' . $imageUriXS . '" media="(max-width: ' . $this->widthXSMax . 'px)" />';
+            $output .= '<' . $this->innerTagName . ' srcset="' . $imageUriSM . '" media="(max-width: ' . $this->widthSMMax . 'px)" />';
+            $output .= '<' . $this->innerTagName . ' srcset="' . $imageUriMD . '" media="(max-width: ' . $this->widthMDMax . 'px)" />';
+            $output .= '<' . $this->innerTagName . ' srcset="' . $imageUri . '" />';
+            $output .= '<' . $this->fallbackTagName . ' src="' . $imageUri . '" ' . $this->renderAgruments() . ' />';
+            $output .= '</' . $this->tagName . '>';
+
+            return $output;
 	}
 }
