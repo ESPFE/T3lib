@@ -31,20 +31,13 @@ use TYPO3\CMS\Fluid\Core\ViewHelper\AbstractViewHelper;
  * = Examples =
  *
  * <code title="Example">
- * <esp:format.dow>{datetime.object</esp:format.dow>
- * </code>
- * <output>
- * 1
- * </output>
- *
- * <code title="Inline notation">
- * {datetime.object -> esp:format.dow()}
+ * <esp:format.dow dateTime="{dateTime.Object}" />
  * </code>
  * <output>
  * 1
  * </output>
  */
-class Nl2spanViewHelper extends AbstractViewHelper
+class DowViewHelper extends AbstractViewHelper
 {
     /**
      * Returns the day of week of a given datetime object
@@ -54,6 +47,6 @@ class Nl2spanViewHelper extends AbstractViewHelper
      */
     public function render(\DateTime $dateTime = null)
     {
-        date('w', $dateTime->getTimestamp());
+        return date('w', $dateTime->getTimestamp());
     }
 }
