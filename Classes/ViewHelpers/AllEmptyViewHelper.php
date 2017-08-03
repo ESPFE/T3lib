@@ -20,7 +20,21 @@
 
 namespace ESP\T3lib\ViewHelpers;
 
-
+/**
+ * renders then, when all array entries are an empty string
+ *
+ * = Examples =
+ *
+ * <code title="Example">
+ * <esp:allEmpty fields="{0: field.headlineL, 1: field.linkL, 2: field.headlineC, 3: field.linkC, 4: field.headlineR, 5: field.linkR}">
+        <f:then>Do something</f:then>
+        <f:else>Do something</f:else>
+ * </esp:allEmpty>
+ * </code>
+ * <output>
+ *  {}
+ * </output>
+ */
 class AllEmptyViewHelper extends \TYPO3\CMS\Fluid\Core\ViewHelper\AbstractConditionViewHelper
 {
     /**
