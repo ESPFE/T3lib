@@ -23,6 +23,7 @@ use TYPO3\CMS\Core\Resource\Exception\ResourceDoesNotExistException;
 use TYPO3\CMS\Core\Resource\FileInterface;
 use TYPO3\CMS\Core\Resource\FileReference;
 use TYPO3\CMS\Extbase\Domain\Model\AbstractFileFolder;
+use TYPO3\CMS\Core\Imaging\ImageManipulation\CropVariantCollection;
 
 class PictureViewHelper extends \TYPO3\CMS\Fluid\Core\ViewHelper\AbstractViewHelper
 {
@@ -99,15 +100,15 @@ class PictureViewHelper extends \TYPO3\CMS\Fluid\Core\ViewHelper\AbstractViewHel
 		$content = '';
 		
 		$content .= (isset($this->arguments['class']))		? ' class="'		.	$this->arguments['class'] . '"'		: '';
-		$content .= (isset($this->arguments['dir']))		? ' dir="'			.	$this->arguments['dir'] . '"'		: '';
-		$content .= (isset($this->arguments['id']))			? ' id="'			.	$this->arguments['id'] . '"'		: '';
-		$content .= (isset($this->arguments['lang']))		? ' lang="'			.	$this->arguments['lang'] . '"'		: '';
+		$content .= (isset($this->arguments['dir']))		? ' dir="'		.	$this->arguments['dir'] . '"'		: '';
+		$content .= (isset($this->arguments['id']))		? ' id="'		.	$this->arguments['id'] . '"'		: '';
+		$content .= (isset($this->arguments['lang']))		? ' lang="'		.	$this->arguments['lang'] . '"'		: '';
 		$content .= (isset($this->arguments['style']))		? ' style="'		.	$this->arguments['style'] . '"'		: '';
 		$content .= (isset($this->arguments['title']))		? ' title="'		.	$this->arguments['title'] . '"'		: '';
 		$content .= (isset($this->arguments['accesskey']))	? ' accesskey="'	.	$this->arguments['accesskey'] . '"'	: '';
 		$content .= (isset($this->arguments['tabindex']))	? ' tabindex="'		.	$this->arguments['tabindex'] . '"'	: '';
 		$content .= (isset($this->arguments['onclick']))	? ' onclick="'		.	$this->arguments['onclick'] . '"'	: '';
-		$content .= (isset($this->arguments['alt']))		? ' alt="'			.	$this->arguments['alt'] . '"'		: ' alt=""';
+		$content .= (isset($this->arguments['alt']))		? ' alt="'		.	$this->arguments['alt'] . '"'		: ' alt=""';
 		$content .= (isset($this->arguments['ismap']))		? ' ismap="'		.	$this->arguments['ismap'] . '"'		: '';
 		$content .= (isset($this->arguments['longdesc']))	? ' longdesc="'		.	$this->arguments['longdesc'] . '"'	: '';
 		$content .= (isset($this->arguments['usemap']))		? ' usemap="'		.	$this->arguments['usemap'] . '"'	: '';
@@ -168,6 +169,14 @@ class PictureViewHelper extends \TYPO3\CMS\Fluid\Core\ViewHelper\AbstractViewHel
             $this->registerArgument('ismap', 'string', 'Specifies an image as a server-side image-map. Rarely used. Look at usemap instead', false);
             $this->registerArgument('longdesc', 'string', 'Specifies the URL to a document that contains a long description of an image', false);
             $this->registerArgument('usemap', 'string', 'Specifies an image as a client-side image-map', false);
+            $this->registerArgument('crop', 'string|bool', 'overrule cropping of image (setting to FALSE disables the cropping set in FileReference)');
+            $this->registerArgument('cropVariant', 'string', 'select a cropping variant, in case multiple croppings have been specified or stored in FileReference', false, 'default');
+            $this->registerArgument('width', 'string', 'width of the image. This can be a numeric value representing the fixed width of the image in pixels. But you can also perform simple calculations by adding "m" or "c" to the value. See imgResource.width for possible options.');
+            $this->registerArgument('height', 'string', 'height of the image. This can be a numeric value representing the fixed height of the image in pixels. But you can also perform simple calculations by adding "m" or "c" to the value. See imgResource.width for possible options.');
+            $this->registerArgument('minWidth', 'int', 'minimum width of the image');
+            $this->registerArgument('minHeight', 'int', 'minimum width of the image');
+            $this->registerArgument('maxWidth', 'int', 'minimum width of the image');
+            $this->registerArgument('maxHeight', 'int', 'minimum width of the image');
         }
 	
 	/**
@@ -203,16 +212,40 @@ class PictureViewHelper extends \TYPO3\CMS\Fluid\Core\ViewHelper\AbstractViewHel
             // get image from typo3 image service
             $image = $this->imageService->getImage($src, $image, $treatIdAsReference);
             $widthArr = $this->calcImageWidth($widthXS, $widthSM, $widthMD, $widthLG);
-
-            $imageXS = $this->processImage($image, $widthArr['xs']);
-            $imageSM = $this->processImage($image, $widthArr['sm']);
-            $imageMD = $this->processImage($image, $widthArr['md']);
-            $image = $this->processImage($image, $widthArr['lg']);
+            
+            $cropString = $this->arguments['crop'];
+            if ($cropString === null && $image->hasProperty('crop') && $image->getProperty('crop')) {
+                $cropString = $image->getProperty('crop');
+            }
+            $cropVariantCollection = CropVariantCollection::create((string)$cropString);
+            $cropVariant = $this->arguments['cropVariant'] ?: 'default';
+            $cropArea = $cropVariantCollection->getCropArea($cropVariant);
+            
+            $processingInstructions = [
+                'width' => $widthArr['xs'],
+                'crop' => $cropArea->isEmpty() ? null : $cropArea->makeAbsoluteBasedOnFile($image),
+            ];
+            $imageXS = $this->imageService->applyProcessingInstructions($image, $processingInstructions);
+            $processingInstructions = [
+                'width' => $widthArr['sm'],
+                'crop' => $cropArea->isEmpty() ? null : $cropArea->makeAbsoluteBasedOnFile($image),
+            ];
+            $imageSM = $this->imageService->applyProcessingInstructions($image, $processingInstructions);
+            $processingInstructions = [
+                'width' => $widthArr['md'],
+                'crop' => $cropArea->isEmpty() ? null : $cropArea->makeAbsoluteBasedOnFile($image),
+            ];
+            $imageMD = $this->imageService->applyProcessingInstructions($image, $processingInstructions);
+            $processingInstructions = [
+                'width' => $widthArr['lg'],
+                'crop' => $cropArea->isEmpty() ? null : $cropArea->makeAbsoluteBasedOnFile($image),
+            ];
+            $imageDefault = $this->imageService->applyProcessingInstructions($image, $processingInstructions);
 
             $imageUriXS = $this->imageService->getImageUri($imageXS, $absolute);
             $imageUriSM = $this->imageService->getImageUri($imageSM, $absolute);
             $imageUriMD = $this->imageService->getImageUri($imageMD, $absolute);
-            $imageUri = $this->imageService->getImageUri( $image, $absolute);
+            $imageUri = $this->imageService->getImageUri( $imageDefault, $absolute);
 
             $output = '<' . $this->tagName . '>';
             $output .= '<' . $this->innerTagName . ' srcset="' . $imageUriXS . '" media="(max-width: ' . $this->widthXSMax . 'px)" />';
