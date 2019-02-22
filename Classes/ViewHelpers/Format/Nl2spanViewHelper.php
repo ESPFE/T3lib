@@ -45,6 +45,13 @@ use TYPO3\CMS\Fluid\Core\ViewHelper\Facets\CompilableInterface;
 class Nl2spanViewHelper extends AbstractViewHelper implements CompilableInterface
 {
     /**
+    * Disable Output escapeing
+    * 
+    * @var bool
+    */
+   protected $escapeOutput = false;
+    
+    /**
      * converts every linebreak in a span
      *
      * @param string $value string to format

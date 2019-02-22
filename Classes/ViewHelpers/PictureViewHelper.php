@@ -24,9 +24,11 @@ use TYPO3\CMS\Core\Resource\FileInterface;
 use TYPO3\CMS\Core\Resource\FileReference;
 use TYPO3\CMS\Extbase\Domain\Model\AbstractFileFolder;
 use TYPO3\CMS\Core\Imaging\ImageManipulation\CropVariantCollection;
+use TYPO3Fluid\Fluid\Core\Rendering\RenderingContextInterface;
 
 class PictureViewHelper extends \TYPO3\CMS\Fluid\Core\ViewHelper\AbstractViewHelper
 {
+    
 	/**
 	 *
 	 * @var string
@@ -177,33 +179,28 @@ class PictureViewHelper extends \TYPO3\CMS\Fluid\Core\ViewHelper\AbstractViewHel
             $this->registerArgument('minHeight', 'int', 'minimum width of the image');
             $this->registerArgument('maxWidth', 'int', 'minimum width of the image');
             $this->registerArgument('maxHeight', 'int', 'minimum width of the image');
+            $this->registerArgument('src', 'string', 'image path', true);
+            $this->registerArgument('treatIdAsReference', 'bool', 'treat id as reference', true);
+            $this->registerArgument('image', 'FileInterface|AbstractFileFolder', 'File Interface Object', false, null);
+            $this->registerArgument('absolute', 'bool', 'src is absolute path', false, false);
+            $this->registerArgument('widthXS', 'int', 'relative width for xs', false, 100);
+            $this->registerArgument('widthSM', 'int', 'relative width for sm', false, 100);
+            $this->registerArgument('widthMD', 'int', 'relative width for md', false, 100);
+            $this->registerArgument('widthLG', 'int', 'relative width for lg', false, 100);
         }
 	
-	/**
-	 * render
-	 * 
-	 * @param string $src
-	 * @param bool $treatIdAsReference
-	 * @param FileInterface|AbstractFileFolder $image
-	 * @param bool $absolute
-	 * @param integer $widthXS
-	 * @param integer $widthSM
-	 * @param integer $widthMD
-	 * @param integer $widthLG
-	 * 
-	 * @return string
-	 */
-	public function render(
-            $src = null,
-            $treatIdAsReference = false,
-            $image = null,
-            $absolute = false,
-            $widthXS = 100,
-            $widthSM = 100,
-            $widthMD = 100,
-            $widthLG = 100
-	)
+
+	public function render()
 	{
+            $src = $this->arguments['src'];
+            $treatIdAsReference = $this->arguments['treatIdAsReference'];
+            $image = $this->arguments['image'];
+            $absolute = $this->arguments['absolute'];
+            $widthXS = $this->arguments['widthXS'];
+            $widthSM = $this->arguments['widthSM'];
+            $widthMD = $this->arguments['widthMD'];
+            $widthLG = $this->arguments['widthLG'];
+                    
             if (is_null($src) && is_null($image) || !is_null($src) && !is_null($image))
             {
                 throw new \TYPO3\CMS\Fluid\Core\ViewHelper\Exception('You must either specify a string src or a File object.', 1479641029);
