@@ -26,7 +26,7 @@ use TYPO3\CMS\Extbase\Domain\Model\AbstractFileFolder;
 use TYPO3\CMS\Core\Imaging\ImageManipulation\CropVariantCollection;
 use TYPO3Fluid\Fluid\Core\Rendering\RenderingContextInterface;
 
-class PictureViewHelper extends \TYPO3\CMS\Fluid\Core\ViewHelper\AbstractViewHelper
+class LazyPictureViewHelper extends \TYPO3\CMS\Fluid\Core\ViewHelper\AbstractViewHelper
 {
     
 	/**
@@ -101,7 +101,7 @@ class PictureViewHelper extends \TYPO3\CMS\Fluid\Core\ViewHelper\AbstractViewHel
 	{
 		$content = '';
 		
-		$content .= (isset($this->arguments['class']))		? ' class="'		.	$this->arguments['class'] . '"'		: '';
+		$content .= (isset($this->arguments['class']))		? ' class="lazyload '		.	$this->arguments['class'] . '"'		: 'class="lazyload"';
 		$content .= (isset($this->arguments['dir']))		? ' dir="'		.	$this->arguments['dir'] . '"'		: '';
 		$content .= (isset($this->arguments['id']))		? ' id="'		.	$this->arguments['id'] . '"'		: '';
 		$content .= (isset($this->arguments['lang']))		? ' lang="'		.	$this->arguments['lang'] . '"'		: '';
@@ -245,11 +245,11 @@ class PictureViewHelper extends \TYPO3\CMS\Fluid\Core\ViewHelper\AbstractViewHel
             $imageUri = $this->imageService->getImageUri( $imageDefault, $absolute);
 
             $output = '<' . $this->tagName . '>';
-            $output .= '<' . $this->innerTagName . ' srcset="' . $imageUriXS . '" media="(max-width: ' . $this->widthXSMax . 'px)" />';
-            $output .= '<' . $this->innerTagName . ' srcset="' . $imageUriSM . '" media="(max-width: ' . $this->widthSMMax . 'px)" />';
-            $output .= '<' . $this->innerTagName . ' srcset="' . $imageUriMD . '" media="(max-width: ' . $this->widthMDMax . 'px)" />';
-            $output .= '<' . $this->innerTagName . ' srcset="' . $imageUri . '" />';
-            $output .= '<' . $this->fallbackTagName . ' src="' . $imageUri . '" ' . $this->renderAgruments() . ' />';
+            $output .= '<' . $this->innerTagName . ' data-srcset="' . $imageUriXS . '" media="(max-width: ' . $this->widthXSMax . 'px)" />';
+            $output .= '<' . $this->innerTagName . ' data-srcset="' . $imageUriSM . '" media="(max-width: ' . $this->widthSMMax . 'px)" />';
+            $output .= '<' . $this->innerTagName . ' data-srcset="' . $imageUriMD . '" media="(max-width: ' . $this->widthMDMax . 'px)" />';
+            $output .= '<' . $this->innerTagName . ' data-srcset="' . $imageUri . '" />';
+            $output .= '<' . $this->fallbackTagName . ' data-src="' . $imageUri . '" ' . $this->renderAgruments() . ' />';
             $output .= '</' . $this->tagName . '>';
 
             return $output;
