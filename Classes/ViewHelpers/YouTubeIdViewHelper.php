@@ -19,6 +19,7 @@
 
 namespace ESP\T3lib\ViewHelpers;
 
+use http\Url;
 use TYPO3\CMS\Fluid\Core\ViewHelper\AbstractViewHelper;
 
 /**
@@ -44,12 +45,53 @@ class YouTubeIdViewHelper extends AbstractViewHelper
      */
     public function render(string $url = null)
     {
-        $needle = 'v=';
-        $start = strpos($url, $needle);
-        $start += strlen($needle);
-        error_log('START: ' . $start);
+        /** @var string $id */
+        $id = '';
+        if(strpos($url, 'v='))
+        {
+            $id = $this->extractFromlBrowserUrl($url);
+        }
+        else
+        {
+            $id = $this->extractFromShareUrl($url);
+        }
+        return $id;
+    }
+
+    /**
+     * @param string $url
+     * @return string
+     */
+    private function extractFromShareUrl(string $url): string
+    {
+        /** @var string $id */
+        $id = '';
+        $start = strrpos($url, '/') + strlen('/');
         $id = substr($url, $start);
-        error_log('ID: ' . $id);
+        return $id;
+    }
+
+    /**
+     * @param string $url
+     * @return string
+     */
+    private function extractFromlBrowserUrl(string $url): string
+    {
+        /** @var string $id */
+        $id = '';
+        /** @var int $start */
+        $start = strpos($url, 'v=') + strlen('v=');
+        /** @var int $stop */
+        $stop = strrpos($url, '&');
+        if($start < $stop)
+        {
+            $len = $stop - $start;
+            $id = substr($url, $start, $len);
+        }
+        else
+        {
+            $id = substr($url, $start);
+        }
         return $id;
     }
 }
