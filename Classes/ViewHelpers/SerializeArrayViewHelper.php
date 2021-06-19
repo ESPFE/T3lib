@@ -19,7 +19,7 @@
 
 namespace ESP\T3lib\ViewHelpers;
 
-use TYPO3\CMS\Fluid\Core\ViewHelper\AbstractViewHelper;
+use TYPO3Fluid\Fluid\Core\ViewHelper\AbstractViewHelper;
 
 /**
  * Returns a serialized array
@@ -41,15 +41,21 @@ class SerializeArrayViewHelper extends AbstractViewHelper
      * @var bool
      */
      protected $escapeOutput = false;
+
+    public function initializeArguments()
+    {
+        parent::initializeArguments();
+        $this->registerArgument('array', 'array', 'Array', true);
+    }
         
     /**
      * Returns a serialized array
      *
-     * @param mixed text
      * @return string
      */
-    public function render($array = null)
+    public function render()
     {
+        $array = $this->arguments['array'];
         $cnt = count($array);
         $i = 0;
         $json = '{';
