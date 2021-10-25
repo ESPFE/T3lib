@@ -56,6 +56,7 @@ class SerializeArrayViewHelper extends AbstractViewHelper
     public function render()
     {
         $array = $this->arguments['array'];
+        /*
         $cnt = count($array);
         $i = 0;
         $json = '{';
@@ -64,9 +65,9 @@ class SerializeArrayViewHelper extends AbstractViewHelper
             $json .= '"' . $key . '" : "' . $val . '"';
             if($i < $cnt - 1) { $json .= ', '; }
             $i += 1;
-            
         }
         $json .= '}';
-        return $json;
+         */
+        return json_encode($array, JSON_HEX_QUOT);
     }
 }
