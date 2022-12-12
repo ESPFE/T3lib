@@ -20,13 +20,14 @@
 namespace ESP\T3lib\ViewHelpers;
 
 use TYPO3\CMS\Core\Resource\Exception\ResourceDoesNotExistException;
-use TYPO3\CMS\Core\Resource\FileInterface;
-use TYPO3\CMS\Core\Resource\FileReference;
-use TYPO3\CMS\Extbase\Domain\Model\AbstractFileFolder;
 use TYPO3\CMS\Core\Imaging\ImageManipulation\CropVariantCollection;
-use TYPO3Fluid\Fluid\Core\Rendering\RenderingContextInterface;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Extbase\Service\ImageService;
+use TYPO3Fluid\Fluid\Core\ViewHelper\AbstractTagBasedViewHelper;
+use TYPO3Fluid\Fluid\Core\ViewHelper\Exception;
+use TYPO3\CMS\Extbase\Annotation\Inject;
 
-class PictureViewHelper extends \TYPO3\CMS\Fluid\Core\ViewHelper\AbstractViewHelper
+class PictureViewHelper extends AbstractTagBasedViewHelper
 {
 
     /**
@@ -81,9 +82,8 @@ class PictureViewHelper extends \TYPO3\CMS\Fluid\Core\ViewHelper\AbstractViewHel
      * Get Image Service Instance
      *
      * @var \TYPO3\CMS\Extbase\Service\ImageService
-     * @inject
      */
-    protected $imageService;
+    protected ImageService $imageService;
 
     /**
      * Disable Output escapeing
@@ -91,6 +91,12 @@ class PictureViewHelper extends \TYPO3\CMS\Fluid\Core\ViewHelper\AbstractViewHel
      * @var bool
      */
     protected $escapeOutput = false;
+
+    public function __construct()
+    {
+        parent::__construct();
+        $this->imageService = GeneralUtility::makeInstance(ImageService::class);
+    }
 
     /**
      * renderArguments
